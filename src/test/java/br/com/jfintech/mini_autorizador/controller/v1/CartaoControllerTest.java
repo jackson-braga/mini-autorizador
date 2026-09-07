@@ -25,8 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.stream.Stream;
 
-import static br.com.jfintech.mini_autorizador.fixture.FixtureConstants.NUMERO_CARTAO;
-import static br.com.jfintech.mini_autorizador.fixture.FixtureConstants.SALDO_INICIAL;
+import static br.com.jfintech.mini_autorizador.fixture.FixtureConstants.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -125,6 +124,18 @@ class CartaoControllerTest {
         verify(consultaCartaoService).consultarSaldo(NUMERO_CARTAO);
     }
 
+    @ParameterizedTest
+    @MethodSource("providerConsulaSaodoNumeroCartaoInvalidos")
+    @DisplayName("deve retornar 400 quando numeroCartao da consulta de saldo for inválido")
+    void deveRetornar400QuandoNumeroCartaoDaConsultaForInvalido(String numeroCartaoInvalido, String mensagemErro) throws Exception {
+
+        mockMvc.perform(get(BASE_PATH + "/" + numeroCartaoInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString(mensagemErro)));
+
+        verifyNoInteractions(consultaCartaoService);
+    }
+
     private static Stream<Arguments> providerCriarCartaoPayloadsInvalidos() {
         return Stream.of(
                 Arguments.of(CartaoRequestFixture.criarCartaoRequestNumeroNula(), "numeroCartao não pode ser nulo ou vazio"),
@@ -136,4 +147,10 @@ class CartaoControllerTest {
         );
     }
 
+    private static Stream<Arguments> providerConsulaSaodoNumeroCartaoInvalidos() {
+        return Stream.of(
+                Arguments.of(NUMERO_CARTAO_INVALIDO, "numeroCartao deve conter 16 dígitos numéricos"),
+                Arguments.of(NUMERO_CARTAO + "7", "numeroCartao deve conter 16 dígitos numéricos")
+        );
+    }
 }

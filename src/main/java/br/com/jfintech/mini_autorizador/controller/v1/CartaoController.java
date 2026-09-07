@@ -11,9 +11,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -23,6 +26,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping("/cartoes")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Cartões", description = "Operações relacionadas a cartões")
 public class CartaoController {
 
@@ -50,7 +54,10 @@ public class CartaoController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     @GetMapping("/{numeroCartao}")
-    public ResponseEntity<BigDecimal> obterSaldo(@PathVariable String numeroCartao) {
+    public ResponseEntity<BigDecimal> obterSaldo(
+            @PathVariable()
+            @Pattern(regexp = "\\d{16}", message = "numeroCartao deve conter 16 dígitos numéricos")
+            String numeroCartao) {
 
         BigDecimal saldo = consultaCartaoService.consultarSaldo(numeroCartao);
         return ResponseEntity.ok(saldo);
