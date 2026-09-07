@@ -6,6 +6,11 @@ import lombok.Getter;
 public class SaldoInvalidoException extends BusinessException {
     private final String payload;
 
+    public SaldoInvalidoException(String message, String payload) {
+        super(message);
+        this.payload = payload;
+    }
+
     public SaldoInvalidoException(String message, Throwable cause, String payload) {
         super(message, cause);
         this.payload = payload;
