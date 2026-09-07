@@ -3,7 +3,7 @@ package br.com.jfintech.mini_autorizador.controller.v1;
 import br.com.jfintech.mini_autorizador.controller.v1.request.CartaoRequest;
 import br.com.jfintech.mini_autorizador.controller.v1.response.CartaoCadastradoResponse;
 import br.com.jfintech.mini_autorizador.service.CadastraCartaoService;
-import br.com.jfintech.mini_autorizador.service.CartaoService;
+import br.com.jfintech.mini_autorizador.service.ConsultaCartaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,7 +27,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class CartaoController {
 
     private final CadastraCartaoService cadastraCartaoService;
-    private final CartaoService cartaoService;
+    private final ConsultaCartaoService consultaCartaoService;
 
     @Operation(summary = "Cria novo cartão")
     @ApiResponses({
@@ -52,7 +52,7 @@ public class CartaoController {
     @GetMapping("/{numeroCartao}")
     public ResponseEntity<BigDecimal> obterSaldo(@PathVariable String numeroCartao) {
 
-        BigDecimal saldo = cartaoService.obterSaldo(numeroCartao);
+        BigDecimal saldo = consultaCartaoService.consultarSaldo(numeroCartao);
         return ResponseEntity.ok(saldo);
     }
 }

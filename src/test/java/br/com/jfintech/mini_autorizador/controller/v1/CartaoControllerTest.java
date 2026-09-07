@@ -9,7 +9,7 @@ import br.com.jfintech.mini_autorizador.exception.NotFoundException;
 import br.com.jfintech.mini_autorizador.fixture.CartaoCadastradoResponseFixture;
 import br.com.jfintech.mini_autorizador.fixture.CartaoRequestFixture;
 import br.com.jfintech.mini_autorizador.service.CadastraCartaoService;
-import br.com.jfintech.mini_autorizador.service.CartaoService;
+import br.com.jfintech.mini_autorizador.service.ConsultaCartaoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class CartaoControllerTest {
     private CadastraCartaoService cadastraCartaoService;
 
     @MockitoBean
-    private CartaoService cartaoService;
+    private ConsultaCartaoService consultaCartaoService;
 
     @Test
     @DisplayName("deve criar cartão com 201 quando payload válido")
@@ -104,25 +104,25 @@ class CartaoControllerTest {
     @DisplayName("deve retornar 200 e o payload com saldo quando cartão existir")
     void deveRetornar200EBodyQuandoConsultaSaldo() throws Exception {
 
-        when(cartaoService.obterSaldo(eq(NUMERO_CARTAO))).thenReturn(SALDO_INICIAL);
+        when(consultaCartaoService.consultarSaldo(eq(NUMERO_CARTAO))).thenReturn(SALDO_INICIAL);
 
         mockMvc.perform(get(BASE_PATH + "/" + NUMERO_CARTAO))
                 .andExpect(status().isOk())
                 .andExpect(content().string(SALDO_INICIAL.toPlainString()));
 
-        verify(cartaoService).obterSaldo(NUMERO_CARTAO);
+        verify(consultaCartaoService).consultarSaldo(NUMERO_CARTAO);
     }
 
     @Test
     @DisplayName("deve retornar 404 quando cartão não existir na consulta de saldo")
     void deveRetornar404QuandoNaoExistirCartao() throws Exception {
 
-        when(cartaoService.obterSaldo(eq(NUMERO_CARTAO))).thenThrow(new NotFoundException("Cartão não encontrado"));
+        when(consultaCartaoService.consultarSaldo(eq(NUMERO_CARTAO))).thenThrow(new NotFoundException("Cartão não encontrado"));
 
         mockMvc.perform(get(BASE_PATH + "/" + NUMERO_CARTAO))
                 .andExpect(status().isNotFound());
 
-        verify(cartaoService).obterSaldo(NUMERO_CARTAO);
+        verify(consultaCartaoService).consultarSaldo(NUMERO_CARTAO);
     }
 
     private static Stream<Arguments> providerCriarCartaoPayloadsInvalidos() {
