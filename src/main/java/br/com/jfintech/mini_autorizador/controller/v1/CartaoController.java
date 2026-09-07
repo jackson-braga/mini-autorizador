@@ -32,8 +32,9 @@ public class CartaoController {
     })
     @PostMapping
     public ResponseEntity<CartaoResponse> criarCartao(@jakarta.validation.Valid @RequestBody CartaoRequest request) {
-        CartaoResponse criado = cartaoService.criarCartao(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(criado);
+
+        CartaoResponse cartao = cartaoService.criarCartao(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(cartao);
     }
 
     @Operation(summary = "Consulta saldo do cartão", description = "Retorna o saldo disponível do cartão informado")
@@ -45,6 +46,7 @@ public class CartaoController {
     })
     @GetMapping("/{numeroCartao}")
     public ResponseEntity<BigDecimal> obterSaldo(@PathVariable String numeroCartao) {
+
         BigDecimal saldo = cartaoService.obterSaldo(numeroCartao);
         return ResponseEntity.ok(saldo);
     }
