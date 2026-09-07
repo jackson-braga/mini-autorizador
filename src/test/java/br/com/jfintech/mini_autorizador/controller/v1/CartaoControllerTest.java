@@ -2,11 +2,13 @@ package br.com.jfintech.mini_autorizador.controller.v1;
 
 import br.com.jfintech.mini_autorizador.config.SecurityConfig;
 import br.com.jfintech.mini_autorizador.controller.v1.request.CartaoRequest;
+import br.com.jfintech.mini_autorizador.controller.v1.response.CartaoCadastradoResponse;
 import br.com.jfintech.mini_autorizador.exception.ApplicationExceptionHandler;
 import br.com.jfintech.mini_autorizador.exception.CartaoExistenteException;
 import br.com.jfintech.mini_autorizador.exception.NotFoundException;
+import br.com.jfintech.mini_autorizador.fixture.CartaoCadastradoResponseFixture;
 import br.com.jfintech.mini_autorizador.fixture.CartaoRequestFixture;
-import br.com.jfintech.mini_autorizador.fixture.CartaoResponseFixture;
+import br.com.jfintech.mini_autorizador.service.CadastraCartaoService;
 import br.com.jfintech.mini_autorizador.service.CartaoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -21,9 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.util.stream.Stream;
 
+import static br.com.jfintech.mini_autorizador.fixture.FixtureConstants.NUMERO_CARTAO;
+import static br.com.jfintech.mini_autorizador.fixture.FixtureConstants.SALDO_INICIAL;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -45,15 +48,18 @@ class CartaoControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private CadastraCartaoService cadastraCartaoService;
+
+    @MockitoBean
     private CartaoService cartaoService;
 
     @Test
     @DisplayName("deve criar cartão com 201 quando payload válido")
     void deveCriarCartaoCom201QuandoPayloadValido() throws Exception {
-        var cartao = CartaoRequestFixture.criarCartaoRequestValido();
-        var esperado = CartaoResponseFixture.criarCartaoResponseValido();
+        CartaoRequest cartao = CartaoRequestFixture.criarCartaoRequestValido();
+        CartaoCadastradoResponse esperado = CartaoCadastradoResponseFixture.criarCartaoCadastradoResponseValido();
 
-        when(cartaoService.criarCartao(eq(cartao))).thenReturn(esperado);
+        when(cadastraCartaoService.cadastrar(eq(cartao))).thenReturn(esperado);
 
         mockMvc.perform(post(BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -61,24 +67,23 @@ class CartaoControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(esperado)));
 
-        verify(cartaoService).criarCartao(eq(cartao));
+        verify(cadastraCartaoService).cadastrar(eq(cartao));
     }
 
     @Test
     @DisplayName("deve retornar 422 quando tentar criar cartão que já existe")
     void deveRetornar422QuandoCartaoJaExiste() throws Exception {
-        var cartao = CartaoRequestFixture.criarCartaoRequestValido();
-        var esperado = CartaoRequestFixture.criarCartaoRequestValido();
+        CartaoRequest cartao = CartaoRequestFixture.criarCartaoRequestValido();
 
-        when(cartaoService.criarCartao(eq(cartao))).thenThrow(new CartaoExistenteException("Cartão já existe", cartao));
+        when(cadastraCartaoService.cadastrar(eq(cartao))).thenThrow(new CartaoExistenteException("Cartão já existe", cartao));
 
         mockMvc.perform(post(BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(cartao)))
                 .andExpect(status().isUnprocessableContent())
-                .andExpect(content().json(objectMapper.writeValueAsString(esperado)));
+                .andExpect(content().json(objectMapper.writeValueAsString(cartao)));
 
-        verify(cartaoService).criarCartao(eq(cartao));
+        verify(cadastraCartaoService).cadastrar(eq(cartao));
     }
 
     @ParameterizedTest
@@ -92,36 +97,32 @@ class CartaoControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString(mensagemErro)));
 
-        verifyNoInteractions(cartaoService);
+        verifyNoInteractions(cadastraCartaoService);
     }
 
     @Test
     @DisplayName("deve retornar 200 e o payload com saldo quando cartão existir")
     void deveRetornar200EBodyQuandoConsultaSaldo() throws Exception {
-        String numero = CartaoRequestFixture.NUMERO_CARTAO;
-        BigDecimal saldoEsperado = BigDecimal.valueOf(500.00);
 
-        when(cartaoService.obterSaldo(eq(numero))).thenReturn(saldoEsperado);
+        when(cartaoService.obterSaldo(eq(NUMERO_CARTAO))).thenReturn(SALDO_INICIAL);
 
-        mockMvc.perform(get(BASE_PATH + "/" + numero))
+        mockMvc.perform(get(BASE_PATH + "/" + NUMERO_CARTAO))
                 .andExpect(status().isOk())
-                .andExpect(content().string(saldoEsperado.toPlainString()));
+                .andExpect(content().string(SALDO_INICIAL.toPlainString()));
 
-        verify(cartaoService).obterSaldo(numero);
+        verify(cartaoService).obterSaldo(NUMERO_CARTAO);
     }
 
     @Test
     @DisplayName("deve retornar 404 quando cartão não existir na consulta de saldo")
-    void deveRetornar404QuandoCartaoNaoExistir() throws Exception {
-        String numero = "0000111122223333";
+    void deveRetornar404QuandoNaoExistirCartao() throws Exception {
 
-        when(cartaoService.obterSaldo(eq(numero))).thenThrow(new NotFoundException("Cartão não encontrado"));
+        when(cartaoService.obterSaldo(eq(NUMERO_CARTAO))).thenThrow(new NotFoundException("Cartão não encontrado"));
 
-        // then
-        mockMvc.perform(get(BASE_PATH + "/" + numero))
+        mockMvc.perform(get(BASE_PATH + "/" + NUMERO_CARTAO))
                 .andExpect(status().isNotFound());
 
-        verify(cartaoService).obterSaldo(numero);
+        verify(cartaoService).obterSaldo(NUMERO_CARTAO);
     }
 
     private static Stream<Arguments> providerCriarCartaoPayloadsInvalidos() {

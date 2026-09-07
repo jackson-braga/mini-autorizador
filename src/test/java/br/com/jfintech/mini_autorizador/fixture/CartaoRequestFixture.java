@@ -2,10 +2,9 @@ package br.com.jfintech.mini_autorizador.fixture;
 
 import br.com.jfintech.mini_autorizador.controller.v1.request.CartaoRequest;
 
-public class CartaoRequestFixture {
+import static br.com.jfintech.mini_autorizador.fixture.FixtureConstants.*;
 
-    public static final String NUMERO_CARTAO = "1234567890123456";
-    public static final String SENHA = "1234";
+public class CartaoRequestFixture {
 
     public static CartaoRequest criarCartaoRequestValido() {
         return new CartaoRequest(NUMERO_CARTAO, SENHA);
@@ -20,7 +19,7 @@ public class CartaoRequestFixture {
     }
 
     public static CartaoRequest criarCartaoRequestNumeroInvalido() {
-        return new CartaoRequest("123", SENHA);
+        return new CartaoRequest(NUMERO_CARTAO_INVALIDO, SENHA);
     }
 
     public static CartaoRequest criarCartaoRequestSenhaNula() {
@@ -32,6 +31,6 @@ public class CartaoRequestFixture {
     }
 
     public static CartaoRequest criarCartaoRequesSenhaInvalido() {
-        return new CartaoRequest(NUMERO_CARTAO, "123");
+        return new CartaoRequest(NUMERO_CARTAO, SENHA_INCOMPLETA);
     }
 }
