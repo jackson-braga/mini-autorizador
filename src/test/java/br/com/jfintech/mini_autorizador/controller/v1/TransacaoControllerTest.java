@@ -3,9 +3,9 @@ package br.com.jfintech.mini_autorizador.controller.v1;
 import br.com.jfintech.mini_autorizador.config.SecurityConfig;
 import br.com.jfintech.mini_autorizador.controller.v1.request.TransacaoRequest;
 import br.com.jfintech.mini_autorizador.exception.ApplicationExceptionHandler;
-import br.com.jfintech.mini_autorizador.exception.SaldoInvalidoException;
+import br.com.jfintech.mini_autorizador.exception.TransacaoInvalidaException;
 import br.com.jfintech.mini_autorizador.fixture.TransacaoRequestFixture;
-import br.com.jfintech.mini_autorizador.service.TransacaoService;
+import br.com.jfintech.mini_autorizador.service.RealizaTransacaoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.containsString;
@@ -43,14 +42,14 @@ class TransacaoControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private TransacaoService transacaoService;
+    private RealizaTransacaoService realizaTransacaoService;
 
     @Test
     @DisplayName("deve retornar 201 e OK quando transação autorizada")
     void deveRetornar201QuandoTransacaoAutorizada() throws Exception {
-        var transacao = TransacaoRequestFixture.criarTransacaoRequestValida();
+        TransacaoRequest transacao = TransacaoRequestFixture.criarTransacaoRequestValida();
 
-        when(transacaoService.realizarTransacao(eq(transacao))).thenReturn(OK);
+        when(realizaTransacaoService.realizarTransacao(eq(transacao))).thenReturn(OK);
 
         mockMvc.perform(post(BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -58,56 +57,55 @@ class TransacaoControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().string(OK));
 
-        verify(transacaoService).realizarTransacao(eq(transacao));
+        verify(realizaTransacaoService).realizarTransacao(eq(transacao));
     }
 
     @Test
     @DisplayName("deve retornar 422 e SALDO_INSUFICIENTE quando saldo insuficiente")
     void deveRetornar422QuandoSaldoInsuficiente() throws Exception {
-        var transacao = TransacaoRequestFixture.criarTransacaoRequestSaldoInsuficiente();
+        TransacaoRequest transacao = TransacaoRequestFixture.criarTransacaoRequestSaldoInsuficiente();
 
-        when(transacaoService.realizarTransacao(eq(transacao))).thenThrow(new SaldoInvalidoException("Saldo insuficiente", "SALDO_INSUFICIENTE"));
+        when(realizaTransacaoService.realizarTransacao(eq(transacao))).thenThrow(new TransacaoInvalidaException("Saldo insuficiente", TransacaoInvalidaException.SALDO_INSUFICIENTE));
 
-        // then
         mockMvc.perform(post(BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(transacao)))
                 .andExpect(status().isUnprocessableContent())
-                .andExpect(content().string("SALDO_INSUFICIENTE"));
+                .andExpect(content().string(TransacaoInvalidaException.SALDO_INSUFICIENTE));
 
-        verify(transacaoService).realizarTransacao(eq(transacao));
+        verify(realizaTransacaoService).realizarTransacao(eq(transacao));
     }
 
     @Test
     @DisplayName("deve retornar 422 e SENHA_INVALIDA quando senha estiver errada")
     void deveRetornar422QuandoSenhaInvalida() throws Exception {
-        var transacao = TransacaoRequestFixture.criarTransacaoRequestComSenhaInvalida();
+        TransacaoRequest transacao = TransacaoRequestFixture.criarTransacaoRequestComSenhaInvalida();
 
-        when(transacaoService.realizarTransacao(eq(transacao))).thenThrow(new SaldoInvalidoException("Senha inválida", "SENHA_INVALIDA"));
+        when(realizaTransacaoService.realizarTransacao(eq(transacao))).thenThrow(new TransacaoInvalidaException("Senha inválida", TransacaoInvalidaException.SENHA_INVALIDA));
 
         mockMvc.perform(post(BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(transacao)))
                 .andExpect(status().isUnprocessableContent())
-                .andExpect(content().string("SENHA_INVALIDA"));
+                .andExpect(content().string(TransacaoInvalidaException.SENHA_INVALIDA));
 
-        verify(transacaoService).realizarTransacao(eq(transacao));
+        verify(realizaTransacaoService).realizarTransacao(eq(transacao));
     }
 
     @Test
     @DisplayName("deve retornar 422 e CARTAO_INEXISTENTE quando cartão não existir")
     void deveRetornar422QuandoCartaoNaoExistir() throws Exception {
-        var transacao = TransacaoRequestFixture.criarTransacaoRequestComCartaoInexistente();
+        TransacaoRequest transacao = TransacaoRequestFixture.criarTransacaoRequestComCartaoInexistente();
 
-        when(transacaoService.realizarTransacao(eq(transacao))).thenThrow(new SaldoInvalidoException("Cartão inexistente", "CARTAO_INEXISTENTE"));
+        when(realizaTransacaoService.realizarTransacao(eq(transacao))).thenThrow(new TransacaoInvalidaException("Cartão inexistente", TransacaoInvalidaException.CARTAO_INEXISTENTE));
 
         mockMvc.perform(post(BASE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(transacao)))
                 .andExpect(status().isUnprocessableContent())
-                .andExpect(content().string("CARTAO_INEXISTENTE"));
+                .andExpect(content().string(TransacaoInvalidaException.CARTAO_INEXISTENTE));
 
-        verify(transacaoService).realizarTransacao(eq(transacao));
+        verify(realizaTransacaoService).realizarTransacao(eq(transacao));
     }
 
     @ParameterizedTest
@@ -115,15 +113,13 @@ class TransacaoControllerTest {
     @DisplayName("deve retornar 400 quando payload de transação for inválido")
     void deveRetornar400QuandoPayloadInvalido(TransacaoRequest transacao, String mensagemErro) throws Exception {
 
-        var request = post(BASE_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(transacao));
-
-        mockMvc.perform(request)
+        mockMvc.perform(post(BASE_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(transacao)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString(mensagemErro)));
 
-        verify(transacaoService, never()).realizarTransacao(eq(transacao));
+        verify(realizaTransacaoService, never()).realizarTransacao(eq(transacao));
     }
 
     public static Stream<Arguments> providerTransacaoPayloadsInvalidos() {

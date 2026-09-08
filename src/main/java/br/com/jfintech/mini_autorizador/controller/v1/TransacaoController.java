@@ -1,7 +1,7 @@
 package br.com.jfintech.mini_autorizador.controller.v1;
 
 import br.com.jfintech.mini_autorizador.controller.v1.request.TransacaoRequest;
-import br.com.jfintech.mini_autorizador.service.TransacaoService;
+import br.com.jfintech.mini_autorizador.service.RealizaTransacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Transações", description = "Operações de autorização de transações")
 public class TransacaoController {
 
-    private final TransacaoService transacaoService;
+    private final RealizaTransacaoService realizaTransacaoService;
 
     @Operation(summary = "Realizar transação")
     @ApiResponses({
@@ -33,7 +33,7 @@ public class TransacaoController {
     @PostMapping
     public ResponseEntity<String> realizarTransacao(@Valid @RequestBody TransacaoRequest request) {
 
-        String resultado = transacaoService.realizarTransacao(request);
+        String resultado = realizaTransacaoService.realizarTransacao(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
     }
 }
