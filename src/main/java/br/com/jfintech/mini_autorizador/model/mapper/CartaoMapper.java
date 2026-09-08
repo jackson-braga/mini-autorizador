@@ -14,6 +14,7 @@ import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 public interface CartaoMapper {
 
     @Mapping(target = "saldo", source = "saldo")
+    @Mapping(target = "versao", ignore = true)
     @Mapping(target = "dataHoraCadastro", ignore = true)
     CartaoEntity toEntity(CartaoRequest request, BigDecimal saldo);
 

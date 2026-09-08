@@ -19,8 +19,12 @@ import java.time.ZoneId;
 public class CartaoEntity {
 
     @Id
-    @Column(name = "numero_cartao", nullable = false, unique = true, length = 19)
+    @Column(name = "numero_cartao", nullable = false, unique = true, length = 16)
     private String numeroCartao;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long versao;
 
     @Column(name = "senha", nullable = false, length = 4)
     private String senha;
