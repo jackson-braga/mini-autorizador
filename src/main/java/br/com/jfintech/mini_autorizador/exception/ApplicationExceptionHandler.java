@@ -3,8 +3,10 @@ package br.com.jfintech.mini_autorizador.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -33,8 +35,8 @@ public class ApplicationExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(ex.getPayload());
     }
 
-    @ExceptionHandler(SaldoInvalidoException.class)
-    public ResponseEntity<String> handleSaldoInvalido(SaldoInvalidoException ex, HttpServletRequest request) {
+    @ExceptionHandler(TransacaoInvalidaException.class)
+    public ResponseEntity<String> handleSaldoInvalido(TransacaoInvalidaException ex, HttpServletRequest request) {
         log.error("Saldo inválido: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(ex.getPayload());
@@ -52,6 +54,12 @@ public class ApplicationExceptionHandler {
                 "path", request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(body);
+    }
+
+    @ExceptionHandler({ObjectOptimisticLockingFailureException.class, PessimisticLockingFailureException.class})
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public void handleConcurrentModification(Exception ex) {
+        log.error("Conflito de concorrência ao atualizar cartão: {}", ex.getMessage(), ex);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
