@@ -17,8 +17,10 @@ public class PersisteTransacaoStep implements RealizaTransacaoStep {
     private final TransacaoMapper transacaoMapper;
 
     @Override
-    public void executar(RealizaTransacaoContext context) {
-        TransacaoEntity transacao = transacaoMapper.toEntity(context.getRequest(), context.getCartao());
+    public RealizaTransacaoContext executar(RealizaTransacaoContext context) {
+        TransacaoEntity transacao = transacaoMapper.toEntity(context.request(), context.cartao());
         transacaoRepository.save(transacao);
+
+        return context;
     }
 }

@@ -14,10 +14,12 @@ public class PersisteSaldoStep implements RealizaTransacaoStep {
     private final CartaoRepository cartaoRepository;
 
     @Override
-    public void executar(RealizaTransacaoContext context) {
+    public RealizaTransacaoContext executar(RealizaTransacaoContext context) {
         cartaoRepository.atualizarSaldoPorNumeroCartao(
-                context.getCartao().getNumeroCartao(),
-                context.getNovoSaldo()
+                context.cartao().getNumeroCartao(),
+                context.novoSaldo()
         );
+
+        return context;
     }
 }

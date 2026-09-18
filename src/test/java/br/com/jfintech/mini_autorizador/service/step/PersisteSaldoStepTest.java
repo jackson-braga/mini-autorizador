@@ -33,8 +33,7 @@ class PersisteSaldoStepTest {
     void devePersistirSaldoDoCartao() {
         TransacaoRequest request = TransacaoRequestFixture.criarTransacaoRequestValida();
         CartaoEntity cartao = CartaoEntityFixture.criarCartaoValido();
-        RealizaTransacaoContext context = RealizaTransacaoContextFixture.criarContextoComDados(request, cartao);
-        context.setNovoSaldo(SALDO_CALCULADO);
+        RealizaTransacaoContext context = RealizaTransacaoContextFixture.criarContextoComDados(request, cartao, SALDO_CALCULADO);
 
         when(cartaoRepository.atualizarSaldoPorNumeroCartao(NUMERO_CARTAO, SALDO_CALCULADO)).thenReturn(1);
 

@@ -21,9 +21,10 @@ public class RealizaTransacaoChain {
 
     public String processar(TransacaoRequest request) {
         RealizaTransacaoContext context = mapper.toContext(request, BigDecimal.ZERO);
-        context.setRequest(request);
 
-        steps.forEach(step -> step.executar(context));
+        for (RealizaTransacaoStep step : steps) {
+            context = step.executar(context);
+        }
 
         return OK;
     }
