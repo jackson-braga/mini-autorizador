@@ -44,7 +44,7 @@ class BuscaCartaoStepTest {
 
         when(cartaoRepository.findById(NUMERO_CARTAO)).thenReturn(Optional.of(cartao));
 
-        buscaCartaoStep.executar(context);
+        context = buscaCartaoStep.executar(context);
 
         assertEquals(contextEsperado, context);
 

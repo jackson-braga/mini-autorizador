@@ -30,10 +30,10 @@ class CalculaNovoSaldoStepTest {
         RealizaTransacaoContext context = RealizaTransacaoContextFixture.criarContextoComDados(request, cartao);
         RealizaTransacaoContext contextEsperado = RealizaTransacaoContextFixture.criarContextoComDados(request, cartao, SALDO_CALCULADO);
 
-        calculaNovoSaldoStep.executar(context);
+        context = calculaNovoSaldoStep.executar(context);
 
         assertEquals(contextEsperado, context);
-        assertEquals(0, SALDO_CALCULADO.compareTo(context.getNovoSaldo()));
-        assertEquals(0, SALDO_CALCULADO.compareTo(context.getCartao().getSaldo()));
+        assertEquals(0, SALDO_CALCULADO.compareTo(context.novoSaldo()));
+        assertEquals(0, SALDO_CALCULADO.compareTo(context.cartao().getSaldo()));
     }
 }

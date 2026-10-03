@@ -12,10 +12,11 @@ import java.math.RoundingMode;
 public class CalculaNovoSaldoStep implements RealizaTransacaoStep {
 
     @Override
-    public void executar(RealizaTransacaoContext context) {
-        BigDecimal saldoAtual = context.getCartao().getSaldo();
-        BigDecimal novoSaldo = saldoAtual.subtract(context.getRequest().valor()).setScale(2, RoundingMode.HALF_UP);
-        context.getCartao().setSaldo(novoSaldo);
-        context.setNovoSaldo(novoSaldo);
+    public RealizaTransacaoContext executar(RealizaTransacaoContext context) {
+        BigDecimal saldoAtual = context.cartao().getSaldo();
+        BigDecimal novoSaldo = saldoAtual.subtract(context.request().valor()).setScale(2, RoundingMode.HALF_UP);
+        context.cartao().setSaldo(novoSaldo);
+
+        return context.withNovoSaldo(novoSaldo);
     }
 }

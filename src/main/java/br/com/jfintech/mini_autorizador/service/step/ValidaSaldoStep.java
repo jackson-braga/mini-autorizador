@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component;
 public class ValidaSaldoStep implements RealizaTransacaoStep {
 
     @Override
-    public void executar(RealizaTransacaoContext context) {
-        if (context.getCartao().getSaldo().compareTo(context.getRequest().valor()) < 0) {
+    public RealizaTransacaoContext executar(RealizaTransacaoContext context) {
+        if (context.cartao().getSaldo().compareTo(context.request().valor()) < 0) {
             throw new TransacaoInvalidaException("Saldo insuficiente", TransacaoInvalidaException.SALDO_INSUFICIENTE);
         }
+
+        return context;
     }
 }

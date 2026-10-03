@@ -20,10 +20,6 @@ public class RealizaTransacaoContextFixture {
 
     public static RealizaTransacaoContext criarContextoComDados(TransacaoRequest request, CartaoEntity cartao, BigDecimal novoSaldo) {
 
-        return RealizaTransacaoContext.builder()
-                .request(request)
-                .cartao(cartao)
-                .novoSaldo(novoSaldo)
-                .build();
+        return new RealizaTransacaoContext(request, cartao, novoSaldo);
     }
 }

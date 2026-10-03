@@ -41,6 +41,8 @@ class RealizaTransacaoChainTest {
         RealizaTransacaoChain chain = new RealizaTransacaoChain(List.of(stepA, stepB), transacaoMapper);
 
         when(transacaoMapper.toContext(request, BigDecimal.ZERO)).thenReturn(context);
+        when(stepA.executar(context)).thenReturn(context);
+        when(stepB.executar(context)).thenReturn(context);
 
         String resultado = chain.processar(request);
 

@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component;
 public class ValidaSenhaStep implements RealizaTransacaoStep {
 
     @Override
-    public void executar(RealizaTransacaoContext context) {
-        if (!context.getCartao().getSenha().equals(context.getRequest().senhaCartao())) {
+    public RealizaTransacaoContext executar(RealizaTransacaoContext context) {
+        if (!context.cartao().getSenha().equals(context.request().senhaCartao())) {
             throw new TransacaoInvalidaException("Senha inválida", TransacaoInvalidaException.SENHA_INVALIDA);
         }
+
+        return context;
     }
 }

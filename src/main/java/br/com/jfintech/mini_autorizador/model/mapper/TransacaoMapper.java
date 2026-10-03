@@ -20,6 +20,7 @@ public interface TransacaoMapper {
     @Mapping(target = "dataHoraTransacao", ignore = true)
     TransacaoEntity toEntity(TransacaoRequest request, CartaoEntity cartao);
 
+    @Mapping(target = "request", source = "request")
     @Mapping(target = "cartao", ignore = true)
     @Mapping(target = "novoSaldo", source = "novoSaldo")
     RealizaTransacaoContext toContext(TransacaoRequest request, BigDecimal novoSaldo);
